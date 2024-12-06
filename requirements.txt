@@ -3,7 +3,7 @@ torchvision
 pytorch_lightning
 transformers
 datasets
-sklearn
+scikit-learn
 pandas
 matplotlib
 glob
