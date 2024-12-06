@@ -12,4 +12,5 @@ janome
 wandb
 flask
 gunicorn
+unidic-lite
 
