@@ -6,6 +6,10 @@ import json
 from transformers import AutoConfig
 import threading
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+
 app = Flask(__name__)
 
 # Đảm bảo rằng bạn sử dụng đường dẫn tương đối đúng
