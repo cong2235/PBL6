@@ -64,4 +64,5 @@ def run():
     app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)  # `use_reloader=False` tránh việc Flask tự khởi động lại khi chạy trong Jupyter
 
 if __name__ == "__main__":
-    run()
+    port = int(os.environ.get("PORT", 5000))  # Render cung cấp biến PORT
+    app.run(host='0.0.0.0', port=port)
