@@ -14,7 +14,7 @@ random
 re
 unicodedata
 wandb
-Flask
+flask
 gunicorn
 os
 threading
