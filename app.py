@@ -1,22 +1,17 @@
+from flask import Flask, jsonify, request
+from flask_cors import CORS  # Import Flask-CORS
 import os
 import torch
-from flask import Flask, jsonify, request
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, BertJapaneseTokenizer
-import json
+from transformers import AutoModelForSequenceClassification, BertJapaneseTokenizer
+import torch.nn.functional as F
 from transformers import AutoConfig
-import threading
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 
 app = Flask(__name__)
+CORS(app)  # Kích hoạt CORS trên toàn bộ ứng dụng
 
 # Đảm bảo rằng bạn sử dụng đường dẫn tương đối đúng
 MODEL_PATH = os.path.join(os.getcwd(), 'checkpoint-250002')
 CONFIG_PATH = os.path.join(MODEL_PATH, 'config.json').replace("\\", "/")
-MODEL_FILE = os.path.join(MODEL_PATH, 'model.safetensors')
-
 LABELS = ['True', 'False']
 
 model = None
@@ -39,33 +34,34 @@ def predict():
     """API nhận câu và trả về dự đoán đúng/sai ngữ pháp"""
     data = request.get_json()
     text = data.get('text', None)
+    threshold = float(data.get('threshold', 0.7))  # Ngưỡng mặc định là 0.7
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
+    if not (0 <= threshold <= 1):
+        return jsonify({"error": "Threshold must be between 0 and 1"}), 400
+
     load_model()
 
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inputs = tokenizer([text], return_tensors="pt", padding=True, truncation=True)
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
-        prediction_idx = torch.argmax(logits, dim=-1).item()
-        prediction_label = LABELS[prediction_idx]
+        probabilities = F.softmax(logits, dim=-1)
+        
+        prob_class_0 = probabilities[0][0].item()
+        prob_class_1 = probabilities[0][1].item()
+
+    prediction = "Correct" if prob_class_1 > threshold else "Incorrect"
 
     return jsonify({
         "input_text": text,
-        "prediction": prediction_label
+        "prediction": prediction,
+        "probability_correct": prob_class_1,
+        "probability_incorrect": prob_class_0,
+        "threshold": threshold
     })
-
-@app.route('/reload_model', methods=['POST'])
-def reload_model():
-    """API để tải lại mô hình"""
-    load_model()
-    return jsonify({"status": "Model reloaded successfully!"})
-
-def run():
-    load_model()
-    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)  # `use_reloader=False` tránh việc Flask tự khởi động lại khi chạy trong Jupyter
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render cung cấp biến PORT
