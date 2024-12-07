@@ -11,6 +11,7 @@ fugashi
 janome
 wandb
 flask
+flask_cors
 gunicorn
 unidic-lite
 
