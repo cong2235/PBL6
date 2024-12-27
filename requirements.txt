@@ -4,3 +4,5 @@ elasticsearch
 waitress
 torch
 transformers
+fugashi
+protobuf
