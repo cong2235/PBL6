@@ -46,7 +46,6 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """API nhận câu và trả về dự đoán đúng/sai ngữ pháp"""
     data = request.get_json()
     text = data.get('text', None)
     threshold = float(data.get('threshold', 0.7))  # Ngưỡng mặc định là 0.7
