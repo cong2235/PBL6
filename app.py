@@ -80,7 +80,7 @@ def predict():
 @app.route('/search', methods=['POST'])
 def search_and_compare():
     try:
-        query = request.json.get('query')
+        query = request.json.get('text')
         if not query:
             return jsonify({"error": "Query not provided"}), 400
 
