@@ -6,3 +6,4 @@ torch
 transformers
 fugashi
 protobuf
+unidic_lite
